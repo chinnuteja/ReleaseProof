@@ -97,7 +97,7 @@ In each case, ReleaseProof reconciles the remote marker and proves that the effe
 
 Requirements:
 
-- Node.js `>=24.21.0 <25`
+- Node.js `>=24.19.0 <25`
 - npm
 
 ```bash

@@ -8,7 +8,7 @@ const require = createRequire(import.meta.url);
 
 async function main(): Promise<number> {
   const mode = process.argv.includes('real_test') ? 'real_test' : 'fixture';
-  const requiredNode = [24, 21, 0] as const;
+  const requiredNode = [24, 19, 0] as const;
   const actualNode = process.versions.node.split('.').map(Number);
   if (actualNode[0] !== requiredNode[0] || actualNode[1]! < requiredNode[1]) {
     process.stderr.write(`Node ${process.versions.node} is unsupported; require Node >= ${requiredNode.join('.')}.\n`);
@@ -18,7 +18,7 @@ async function main(): Promise<number> {
 
   const tsxShim = resolve('node_modules/.bin', process.platform === 'win32' ? 'tsx.cmd' : 'tsx');
   if (!existsSync(tsxShim)) {
-    process.stderr.write('Clean install is incomplete: node_modules/.bin shims are missing. Re-run npm ci with Node 24.21.0.\n');
+    process.stderr.write('Clean install is incomplete: node_modules/.bin shims are missing. Re-run npm ci with Node 24.19.0 or newer.\n');
     return 1;
   }
 
