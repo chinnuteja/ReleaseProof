@@ -1,3 +1,4 @@
+import './load-local-env.js';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { createRequire } from 'node:module';

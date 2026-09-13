@@ -1,3 +1,4 @@
+import './load-local-env.js';
 import { spawn } from 'node:child_process';
 import { resolve } from 'node:path';
 
