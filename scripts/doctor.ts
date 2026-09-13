@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { createRequire } from 'node:module';
-import { loadEnvironmentRegistry, openDatabase, probeConnections, requireModelConfig, parseRuntimeConfig, smokeTestStructuredOutput } from '@releaseproof/core';
+import { loadEnvironmentRegistry, openDatabase, probeConnections, requireModelConfig, parseRuntimeConfig, smokeTestGeminiStructuredOutput, smokeTestStructuredOutput } from '@releaseproof/core';
 
 const require = createRequire(import.meta.url);
 
@@ -40,7 +40,8 @@ async function main(): Promise<number> {
     return 0;
   }
 
-  const missing = ['GITHUB_TOKEN', 'SLACK_BOT_TOKEN', 'SLACK_APP_TOKEN', 'LINEAR_API_KEY', 'OPENAI_API_KEY', 'OPENAI_MODEL'].filter((name) => !process.env[name]);
+  const missing = ['GITHUB_TOKEN', 'SLACK_BOT_TOKEN', 'SLACK_APP_TOKEN', 'LINEAR_API_KEY'].filter((name) => !process.env[name]);
+  if (!process.env.GEMINI_API_KEY && (!process.env.OPENAI_API_KEY || !process.env.OPENAI_MODEL)) missing.push('GEMINI_API_KEY or OPENAI_API_KEY + OPENAI_MODEL');
   if (missing.length > 0) {
     process.stderr.write(`Real-test access is blocked: missing ${missing.join(', ')}.\n`);
     return 2;
@@ -63,7 +64,9 @@ async function main(): Promise<number> {
   const parsed = parseRuntimeConfig(process.env);
   const model = parsed.ok ? requireModelConfig(parsed.value) : null;
   if (model) {
-    const smoke = await smokeTestStructuredOutput(model.apiKey, model.model);
+    const smoke = model.provider === 'gemini'
+      ? await smokeTestGeminiStructuredOutput(model.apiKey, model.model)
+      : await smokeTestStructuredOutput(model.apiKey, model.model);
     process.stdout.write(smoke.ok ? `model: confirmed structured-output smoke for ${smoke.model}\n` : `model: unavailable ${smoke.reason}\n`);
     if (!smoke.ok) exitCode = 2;
   }

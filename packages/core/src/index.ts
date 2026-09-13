@@ -16,3 +16,4 @@ export * from './domain/checks.js';
 export * from './agent/planner.js';
 export * from './application/workflow.js';
 export * from './application/model-openai.js';
+export * from './application/model-gemini.js';

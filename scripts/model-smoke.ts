@@ -1,4 +1,4 @@
-import { requireModelConfig, parseRuntimeConfig, smokeTestStructuredOutput } from '@releaseproof/core';
+import { requireModelConfig, parseRuntimeConfig, smokeTestGeminiStructuredOutput, smokeTestStructuredOutput } from '@releaseproof/core';
 
 async function main(): Promise<number> {
   const parsed = parseRuntimeConfig({
@@ -7,14 +7,18 @@ async function main(): Promise<number> {
     OPERATOR_PASSWORD: process.env.OPERATOR_PASSWORD ?? 'local-operator-password',
     SESSION_SECRET: process.env.SESSION_SECRET ?? 'local-session-secret-which-is-long-enough',
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-    OPENAI_MODEL: process.env.OPENAI_MODEL
+    OPENAI_MODEL: process.env.OPENAI_MODEL,
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    GEMINI_MODEL: process.env.GEMINI_MODEL
   });
   const model = parsed.ok ? requireModelConfig(parsed.value) : null;
   if (!model) {
-    process.stderr.write('Model smoke test is blocked: OPENAI_API_KEY and OPENAI_MODEL are not configured.\n');
+    process.stderr.write('Model smoke test is blocked: GEMINI_API_KEY or OPENAI_API_KEY + OPENAI_MODEL are not configured.\n');
     return 2;
   }
-  const result = await smokeTestStructuredOutput(model.apiKey, model.model);
+  const result = model.provider === 'gemini'
+    ? await smokeTestGeminiStructuredOutput(model.apiKey, model.model)
+    : await smokeTestStructuredOutput(model.apiKey, model.model);
   if (!result.ok) {
     process.stderr.write(`Model smoke test failed: ${result.reason}\n`);
     return 1;

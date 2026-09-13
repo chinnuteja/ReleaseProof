@@ -1,5 +1,6 @@
 import {
   createEvidenceFollowingModel,
+  createGeminiModel,
   createGitHubAdapter,
   createLinearAdapter,
   createOpenAIModel,
@@ -14,8 +15,9 @@ export function createConfiguredWorkerRuntime(environment: NodeJS.ProcessEnv): {
 } {
   const mode = environment.RELEASEPROOF_MODE === 'real_test' ? 'real_test' : 'fixture';
   if (mode === 'real_test') {
-    const missing = ['GITHUB_TOKEN', 'SLACK_BOT_TOKEN', 'SLACK_APP_TOKEN', 'LINEAR_API_KEY', 'OPENAI_API_KEY', 'OPENAI_MODEL']
+    const missing = ['GITHUB_TOKEN', 'SLACK_BOT_TOKEN', 'SLACK_APP_TOKEN', 'LINEAR_API_KEY']
       .filter((name) => !environment[name]);
+    if (!environment.GEMINI_API_KEY && (!environment.OPENAI_API_KEY || !environment.OPENAI_MODEL)) missing.push('GEMINI_API_KEY or OPENAI_API_KEY + OPENAI_MODEL');
     if (missing.length > 0) throw new Error(`Real-test worker is missing required settings: ${missing.join(', ')}.`);
   }
   const loaded = loadEnvironmentRegistry({ mode, path: environment.RELEASEPROOF_ENVIRONMENT_PATH });
@@ -41,7 +43,9 @@ export function createConfiguredWorkerRuntime(environment: NodeJS.ProcessEnv): {
   });
 
   const model = mode === 'real_test'
-    ? createOpenAIModel(environment.OPENAI_API_KEY!, environment.OPENAI_MODEL!)
+    ? environment.GEMINI_API_KEY
+      ? createGeminiModel(environment.GEMINI_API_KEY, environment.GEMINI_MODEL)
+      : createOpenAIModel(environment.OPENAI_API_KEY!, environment.OPENAI_MODEL!)
     : createEvidenceFollowingModel(loaded.environment);
   const ports: WorkflowPorts = {
     github,

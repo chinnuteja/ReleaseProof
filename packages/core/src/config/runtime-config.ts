@@ -7,6 +7,8 @@ const RuntimeConfigSchema = z.object({
   SESSION_SECRET: z.string().min(32),
   OPENAI_API_KEY: z.string().min(1).optional(),
   OPENAI_MODEL: z.string().min(1).optional(),
+  GEMINI_API_KEY: z.string().min(1).optional(),
+  GEMINI_MODEL: z.string().min(1).optional(),
   GITHUB_TOKEN: z.string().min(1).optional(),
   SLACK_BOT_TOKEN: z.string().min(1).optional(),
   SLACK_APP_TOKEN: z.string().min(1).optional(),
@@ -34,8 +36,9 @@ export function parseRuntimeConfig(environment: NodeJS.ProcessEnv): RuntimeConfi
   return { ok: false, missing: [...missing].sort(), invalid: [...invalid].sort() };
 }
 
-export function requireModelConfig(config: RuntimeConfig): { apiKey: string; model: string } | null {
+export function requireModelConfig(config: RuntimeConfig): { provider: 'openai'; apiKey: string; model: string } | { provider: 'gemini'; apiKey: string; model?: string } | null {
+  if (config.GEMINI_API_KEY) return { provider: 'gemini', apiKey: config.GEMINI_API_KEY, ...(config.GEMINI_MODEL ? { model: config.GEMINI_MODEL } : {}) };
   return config.OPENAI_API_KEY && config.OPENAI_MODEL
-    ? { apiKey: config.OPENAI_API_KEY, model: config.OPENAI_MODEL }
+    ? { provider: 'openai', apiKey: config.OPENAI_API_KEY, model: config.OPENAI_MODEL }
     : null;
 }
