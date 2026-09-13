@@ -1,4 +1,6 @@
-**ReleaseProof six-phase implementation plan**
+**ReleaseProof implementation plan — revised delivery scope**
+
+ADR-09 (2026-09-14, user-requested): execute **P1 → P2 → combined P3 → P6**. [Combined P3 plan](06-COMBINED-PHASE-3.md) is the authoritative next-phase scope. It replaces standalone P3/P4/P5 tasks and gates; P4 and P5 are superseded, not completed. Preserve the original authority and truthful-evidence rules.
 
 Execute phases in dependency order. Within a phase, complete the smallest runnable vertical slice before expanding it. A phase is locally verified only when its required checks have actual evidence. Git synchronization is a separate mandatory handoff check in 03-CODEX-RUNBOOK.md. All checkboxes below start unchecked.
 
@@ -24,7 +26,7 @@ The phase evidence file is `evidence/P1.md` through `evidence/P6.md`. Each conta
 | npm run db:migrate | Apply pending migrations; fail on checksum or incompatible schema |
 | npm run doctor -- --mode fixture | Verify runtime, SQLite, fixture configuration and local dependencies |
 | npm run doctor -- --mode real_test --env demo | Verify configured identities and advertised endpoint access without publishing a release |
-| npm run verify -- --phase P1 --mode fixture | Run that phase's registered applicable checks; phase argument supports P1–P6 |
+| npm run verify -- --phase P1 --mode fixture | Run that phase's registered applicable checks; active phase IDs are P1, P2, P3 and P6; legacy P4/P5 report superseded |
 | npm run verify -- --phase P2 --mode real_test --env demo --allow-test-writes | Run gated real checks; uses scoped configured resources and genuine approval |
 | npm run eval -- --suite core --mode fixture --seed 17 | Execute core and persistence scenarios; export normalized result records |
 | npm run eval -- --suite holdout --mode fixture --seed 91 | Execute reserved changed-identity/timing cases |
@@ -38,7 +40,7 @@ Use npm.cmd in PowerShell if npm.ps1 is blocked by local execution policy; do no
 
 Result: a reproducible repository and durable local runtime that can identify the three configured external apps. Architecture references: A2–A7, A10, A12. Evaluation references: SC-10, SC-13, SC-15 and E4.
 
-Entry: documents are available; no assumption that a repository, tokens or scaffold already exists. Run the runbook's repository discovery first. The current planning folder has no remote; record the actual target once supplied or discovered in an implementation project. Never invent an owner/repository.
+Entry: documents are available. Run the runbook's repository discovery first. The configured source target is `chinnuteja/ReleaseProof`; the disposable release target is `chinnuteja/ReleaseProof-demo`. Verify live remotes and credentials rather than inferring access from these names.
 
 Implementation tasks:
 
@@ -94,112 +96,41 @@ Evidence: P2.md, SC-01 receipt, matched manifest/approval/tag observations and t
 
 Stop rule: do not add more planner tools, release types or policy languages before SC-01 works. If the happy path is still broken at the event's midpoint, resolve it before expanding search or visuals.
 
-**P3. Durable execution and useful recovery**
+**P3. Combined recovery, proof, and product**
 
-Result: the worker can distinguish rejected writes, unknown writes and observed effects, including after restart. References: A7–A8, A11, A14; SC-05, SC-08–14 and SC-16.
+Implement [06-COMBINED-PHASE-3.md](06-COMBINED-PHASE-3.md), including its P2 closure checkpoint and P3-G1–G6. Do not execute the former P3, P4 and P5 as separate phases.
 
-Entry: a complete approved workflow exists. Do not retrofit recovery around a sequence of unjournaled SDK calls; refactor the executor to the operation protocol before extending it.
+| Checkpoint | Outcome |
+| --- | --- |
+| P3.0 | Repair and re-verify P2 integration/authority gaps; close live gates as credentials arrive |
+| P3.1 | Durable operations, lost-response and crash recovery, partial completion, cancellation and expiry |
+| P3.2 | Five independent rules, fixed baseline/corrected comparison, authored replay and one holdout |
+| P3.3 | One polished workspace with persisted timeline, exact-SHA receipt, provider links and focused browser checks |
+| P3.4 | Consolidated verification, evidence, source digest and Git handoff; proceed to P6 |
 
-Implementation tasks:
+Cut automatic exploration/minimization, the general evaluation platform, Arga, extra dashboards, live chaos controls and marketing pages. Keep the underlying safety semantics and existing regression coverage. The replay trace is authored, not discovered or minimized.
 
-- [ ] P3.1 Persist unique operations and attempts before dispatch; normalize not_sent/rejected/unknown/observed outcomes; remove hidden automatic write retries.
-- [ ] P3.2 Implement GitHub tag/manifest-marker reconciliation, bounded readback and conflict detection. Retry on the UI resumes reconciliation for unknown writes.
-- [ ] P3.3 Implement the after-apply/before-response fault hook below the real adapter. Ensure the worker cannot read the observer's successful response.
-- [ ] P3.4 On startup, reconcile interrupted reserved/sent operations before considering new writes. Test a real process termination against the same fixture state/database.
-- [ ] P3.5 Add partial completion and independent pending steps for Linear and Slack. Reconcile uncertain Slack message and Linear comment creation using stable markers.
-- [ ] P3.6 Implement and display cancellation cutoff, approval expiry during recovery, provider backoff and budget exhaustion. No blind repeat on an ambiguous 404/5xx path.
+Evidence: `evidence/P3.md`, current P1/P2 regression results, normalized comparison/recovery records, replay JSON and screenshots. Real P2 completion remains mandatory for final delivery. Real SC-05 is exercised once during P6; fixture P3 completion does not satisfy that real gate.
 
-Completion checkpoints:
+**P4 and P5. Superseded by combined P3**
 
-- [ ] P3-G1 SC-05 completes after an injected successful-response loss. The controlled run records one publish attempt and one observed matching release; no remote ID leaked from the fault observer.
-- [ ] P3-G2 SC-09 survives worker termination with the same outcome and correct operation history. Restart does not manufacture another approval or silently rerun a publish.
-- [ ] P3-G3 SC-08 exposes partial completion and recovers only the unfinished steps. Linear HTTP 200 errors cannot become success.
-- [ ] P3-G4 SC-10 and SC-11 preserve idempotency and effect uniqueness. Record the actual provider behavior when duplicate requests are rejected; do not call it a duplicate release if none exists.
-- [ ] P3-G5 SC-12 remains unverified when observations are missing; SC-14 does not blindly duplicate messages/comments after uncertain results.
-- [ ] P3-G6 SC-16 respects the cutoff and expires authority for new attempts while preserving already-observed effects.
-- [ ] P3-G7 SC-05 is also demonstrated with a real test-account release and openly labeled injected response loss. Fixture-only success does not satisfy this external gate.
+No separate implementation, phase evidence, or completion claim is required for these IDs. Preserve old references as historical context; use ADR-09 and the combined plan for current scope.
 
-Verification: `npm run check`, `npm run verify -- --phase P3 --mode fixture`, and the P3 real-test verification command with the explicit test-write flag. Review attempts and provider objects together. Restart the actual worker process; a function-level mocked exception is not a process-recovery test.
-
-The crash-test harness may terminate only its own recorded child worker PID after verifying that worker's instance and fixture database path. Never kill every node process or a process belonging to Codex, the browser or unrelated work.
-
-Evidence: P3.md, redacted attempt history, SC-05/08/09/14 observations, actual restart result and real receipt. Git milestone subject: `feat: reconcile uncertain writes and recover partial releases`.
-
-Stop rule: unresolved reads result in needs_attention. Never add a second release tag or overwrite approval data to make recovery appear successful.
-
-**P4. Verification engine and regression evidence**
-
-Result: independently checked failures can be discovered in a bounded model, reproduced against the application, reduced and replayed. References: A13–A14; E1–E7.
-
-Entry: the real executor and recovery code are stable enough to test. Model exploration operates on fixtures/abstract state, not customer services.
-
-Implementation tasks:
-
-- [ ] P4.1 Implement INV-01–05 as pure predicates with evidence references and inconclusive handling. They cannot import the agent/model module or provider mutation code.
-- [ ] P4.2 Implement actor-valid event schedules at declared hooks, fixed seed/clock, reset and the declared exploration caps. Report model candidates separately from application replays.
-- [ ] P4.3 Add a deliberately broken fixture-only baseline that re-resolves a mutable branch. Run SC-02 against baseline and corrected code under identical conditions.
-- [ ] P4.4 Implement dependency-preserving reduction and safe JSON export/replay. Reproduction must re-execute the relevant adapter/executor path after reset.
-- [ ] P4.5 Create the held-out IDs/timing case, keep original fixture data separate and verify the result is not tied to hardcoded A/B strings or issue IDs.
-- [ ] P4.6 If available endpoints work, reproduce one relevant case in Arga. Record per-method gaps and provider modes. Arga support is optional; truthful labels are mandatory.
-
-Completion checkpoints:
-
-- [ ] P4-G1 SC-02 exposes INV-01 in the seeded baseline and passes with useful completion in the corrected implementation.
-- [ ] P4-G2 The exported reduced sequence reproduces the same predicate failure after reset. The file identifies setup, actors, seed, code digest and mode.
-- [ ] P4-G3 Removing an actor prerequisite invalidates a schedule; the reducer cannot create impossible authority to shorten a trace.
-- [ ] P4-G4 The held-out fixture passes. Recorded decision replay and fresh model execution are labeled separately.
-- [ ] P4-G5 Unsupported endpoints, timeouts, pruned paths and inconclusive observations are included in counts, not silently treated as passes.
-- [ ] P4-G6 A tampered export with arbitrary remote URLs or credential references is rejected. No test-mode production fallback exists.
-
-Verification: `npm run check`, `npm run verify -- --phase P4 --mode fixture`, `npm run eval -- --suite core --mode fixture --seed 17`, `npm run eval -- --suite holdout --mode fixture --seed 91`, and `npm run replay -- --file <actual-export-path> --mode fixture`. Replace the placeholder with a real generated file; record the exact invocation.
-
-Evidence: P4.md, paired comparison records, reduced and parent schedules, redacted regression JSON and held-out results. Git milestone subject: `feat: add independent workflow verification and replay`.
-
-Stop rule: when the bounded counterexample and replay work, resist adding a generic solver, autonomous patch agent or more integrations. Those additions do not replace missing evidence.
-
-**P5. Product experience and visible correctness**
-
-Result: the interface makes authority, progress, uncertainty and completion understandable without reading logs. References: A12, A15; SC-01/02/05/08/12 and E8.
-
-Entry: backend APIs and evidence schemas are stable. Frontend shell work may have started earlier against frozen contracts, but this phase closes only against working backend behavior.
-
-Implementation tasks:
-
-- [ ] P5.1 Finish one release workspace: request input, connection status, candidate summary, Slack approval state and ordered timeline.
-- [ ] P5.2 Build the expandable receipt showing request, approved SHA, observed SHA, reviewer, app outcomes, pending steps and source links.
-- [ ] P5.3 Derive controls from server-provided valid actions. Show queued cancellation separately from applied cancellation; label reconciliation and partial completion honestly.
-- [ ] P5.4 Add the scenario comparison and replay view with persistent provider-mode labels. Raw technical evidence remains expandable.
-- [ ] P5.5 Verify empty/loading/error states, keyboard operation, visible focus, readable narrow layouts and browser refresh during execution. Add optional fault controls only after core views work.
-
-Completion checkpoints:
-
-- [ ] P5-G1 Browser journey creates a run, displays genuine approval state and shows a receipt matching the backend/provider observations.
-- [ ] P5-G2 SC-05 visibly moves through uncertain/reconciling to observed completion; no hardcoded green animation substitutes for state.
-- [ ] P5-G3 SC-08 and SC-12 visibly show partial or unverified outcomes with actionable next steps.
-- [ ] P5-G4 Reloading or navigating away during a run reconstructs the correct state; polling does not repeatedly call external provider APIs.
-- [ ] P5-G5 Session/CSRF controls protect mutations and receipts. Browser bundles and screenshots contain no secrets.
-- [ ] P5-G6 A reviewer can identify the approved revision, published revision and pending work from the first receipt view without opening a terminal.
-
-Verification: `npm run check`, `npm run verify -- --phase P5 --mode fixture`, `npm run test:browser`, then one manual walk-through of the real run. Capture actual screenshots for normal, reconciling and partial states. Visual inspection is required in addition to passing browser assertions.
-
-Evidence: P5.md, redacted screenshots, Playwright results and any measured UI/acknowledgment latency. Git milestone subject: `feat: deliver release workspace and inspectable receipts`.
-
-Stop rule: cut decorative graphs, marketing pages and animation before sacrificing the receipt, error states or an inspectable demonstration.
-
-**P6. Final evaluation, clean-clone delivery and GitHub handoff**
+**P6. Deployment, final evaluation, documentation and GitHub handoff**
 
 Result: a reviewer can obtain the repository, run the fixture demonstration, inspect measured evidence and understand the actual three-app run. References: A16; E6–E8.
 
-Entry: previous local phase gates pass; remaining access, provider or Git synchronization issues are explicitly recorded. Unresolved essential real-integration gates must be repaired before calling the project complete.
+Entry: P1/P2 and combined P3 local gates pass; remaining access, provider or Git synchronization issues are explicitly recorded. Unresolved essential real-integration gates must be repaired before calling the project complete.
 
 Implementation tasks:
 
 - [ ] P6.1 Run the full applicable fixture corpus and held-out suite. Repeat selected fresh model runs where time/access permit; record actual counts and missing repetitions.
-- [ ] P6.2 Run a current real SC-01 and the main SC-02/05 demonstration with provider observations. Keep the deliberately unsafe baseline fixture-only and clearly labeled.
+- [ ] P6.2 Run a current real SC-01 and one real SC-05 response-loss demonstration with provider observations. Use the fixture-only paired SC-02 result for the drift comparison; a live drift variant is optional. Keep the deliberately unsafe baseline fixture-only and clearly labeled.
 - [ ] P6.3 Write README setup, architecture overview, exact commands, environment requirements and troubleshooting. Export a concise reliability brief directly from result records.
-- [ ] P6.4 Record a two-minute demonstration: task, plan, approval, drift, corrected execution, lost-response recovery, receipt and replay. Label edited waiting periods and simulated/real sections.
+- [ ] P6.4 Record a two-minute demonstration: task, plan, approval, drift, corrected execution, lost-response recovery, receipt and authored regression replay. Label edited waiting periods and simulated/real sections.
 - [ ] P6.5 In a new temporary checkout, install from the lockfile, migrate, build, run fixture checks and start the project without relying on the original database or untracked files.
 - [ ] P6.6 Review all publishable artifacts, commit intended source/docs/tests, push, verify remote SHA and inspect required CI for that exact commit. Record the repository URL, branch, commit, demo location and known limitations in the handoff.
+- [ ] P6.7 Deploy web and a single worker on one persistent host with local shared SQLite, HTTPS and operator authentication. Verify hosted startup, health, migrations, secret isolation, native SQLite loading and restart/resume. Record the actual URL and hosting status; a local-only delivery must not be labeled deployed.
 
 Completion checkpoints:
 
@@ -209,18 +140,19 @@ Completion checkpoints:
 - [ ] P6-G4 README, dashboard and reliability brief agree on scope, modes, counts and limitations. Prerelease is never described as production deployment.
 - [ ] P6-G5 All intended project files are committed; secrets/raw artifacts are excluded; the configured remote branch equals the committed SHA. Required CI is green or a concrete blocker is reported.
 - [ ] P6-G6 Final response identifies what was built, what was tested, real vs fixture evidence, repository/commit and unresolved limitations. Event submission itself occurs only under the user's submission instruction.
+- [ ] P6-G7 Hosted application passes the deployment smoke and persistence checks on its actual host, or hosted deployment is explicitly BLOCKED with local delivery separately identified.
 
 Verification: `npm ci`, `npm run db:migrate`, `npm run check`, `npm run verify -- --phase P6 --mode fixture`, full eval, held-out eval, browser checks, real checks and the runbook Git verification. Run clean-checkout checks once; repeat only if relevant changes or failures justify it.
 
 Evidence: P6.md, final results, actual demo file/link, reliability brief, clean-checkout result and final remote/CI identifiers. Git milestone subject: `docs: ship verified releaseproof demo and reproducible evidence`.
 
-**B2. Event time allocation and scope cuts**
+**B2. Deadline allocation and approved cuts**
 
-For a six-and-a-half-hour build window, use the following aggressive planning budget, not a completion prediction: P1 40 minutes, P2 60, P3 70, P4 50, P5 50, P6 80, plus 40 minutes of contingency. Integration setup and a beginner's learning time may exceed these allocations. Evidence gates remain truthful regardless of time spent.
+Use the deadline discipline in the combined P3 plan: reserve at least the final quarter of remaining time for P6. No new deadline or implementation duration has been supplied; allocation percentages are priorities, not completion estimates.
 
-Start the thin UI during P2 and capture screenshots/notes as features work. Reserve the final hour for recording, clean-clone verification and delivery. If behind, cut optional Arga integration where unsupported, broad exploration, live chaos controls, telemetry, decorative views and extra fresh-model repetitions, explicitly recording the cuts. Preserve the real three-app flow, exact approval binding, response-loss recovery, one reproducible counterexample and an honest receipt.
+The new phase replaces three separate build phases. P6 packages, deploys and verifies the retained product; deferred exploration, minimization, Arga and decorative surfaces must not reappear there. Preserve the real three-app flow, exact approval binding, response-loss recovery, authored replay and an observed receipt.
 
-If a required feature cannot be completed, identify the project as partial and record the missing gate. A deadline is not permission to fake an integration, weaken a failing test or change a rule solely to obtain a green result.
+If a required boundary or live gate remains unresolved, record the project as incomplete for that gate. Do not relabel an authored trace as discovered/minimized or count absent observations as success.
 
 **B3. Work ownership if multiple coding tasks are used**
 

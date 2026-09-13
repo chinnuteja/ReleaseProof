@@ -1,8 +1,10 @@
 **ReleaseProof technical architecture**
 
+**ADR-09 — delivery scope amendment (2026-09-14).** The user combined P3/P4/P5 into [one next phase](06-COMBINED-PHASE-3.md), followed directly by P6. The authority, persistence, isolation and receipt contracts remain required. Automatic exploration/minimization and Arga are deferred. P6 now includes hosted deployment verification on the existing single-host topology. Historical phase references yield to this amendment.
+
 **A1. Product contract and operating boundary**
 
-ReleaseProof coordinates one release across GitHub, Slack and Linear. Given a requested Linear issue, it gathers linked code evidence, proposes a specific prerelease, obtains approval for an immutable manifest, executes the authorized operations and verifies the resulting external state. Its verification package searches a bounded set of event orders and exports reproducible counterexamples.
+ReleaseProof coordinates one release across GitHub, Slack and Linear. Given a requested Linear issue, it gathers linked code evidence, proposes a specific prerelease, obtains approval for an immutable manifest, executes the authorized operations and verifies the resulting external state. Its verification package executes a fixed scenario corpus and exports an authored, replayable counterexample plus the corrected result.
 
 The initial deployment is a single operator, one configured workspace, one allowlisted GitHub repository, one Slack channel and one Linear team. Real demonstrations use dedicated test resources. A GitHub prerelease is the final code-delivery artifact; this application does not deploy to production. The development repository used by Codex for commits should be separate from the disposable release-demo repository.
 
@@ -83,7 +85,7 @@ Keep runtime configuration validation lazy at server/worker startup. Importing a
 
 **A4. Repository structure and dependency direction**
 
-The following paths describe files to create at the implementation repository root; they do not exist yet.
+The following paths describe the target repository layout; inspect build state and source for current implementation status.
 
 ```text
 AGENTS.md                         Small instructions entry point for Codex
@@ -110,7 +112,7 @@ packages/
     persistence/                  Database access and transactional repositories
     agent/                        Read-tool registry and structured planner
     providers/                    GitHub, Linear, Slack and transport adapters
-    verification/                 Predicates, scheduler, reducer and replay
+    verification/                 Predicates, fixed scenarios and safe replay
     evidence/                     Observation normalization, redaction, receipts
     config/                       Environment registry and startup validation
 migrations/                       Ordered SQL files and schema version
@@ -341,17 +343,15 @@ Errors use { code, message, retryable, correlationId, details } with codes such 
 
 Implement the rule IDs and scenario contracts in 05-EVALUATION-CONTRACT.md. Predicates consume normalized observations plus the declared policy and manifest. They return pass/fail/inconclusive/not_applicable, evidence references and a reason. Unknown or missing observations never become pass. The acting model cannot modify predicate definitions.
 
-Search a small model of declared hooks: plan frozen, approval accepted, before publish, after dispatch, before response delivery, before Linear update and before receipt completion. Events name legitimate actors and have preconditions. The permitted maintainer may advance a branch, the reviewer may approve, and the harness may hide a response. The agent cannot impersonate either actor.
+Under ADR-09, execute a fixed set of authored, actor-valid schedules at named hooks. Keep one fixture-only baseline/corrected comparison, reset each run, and export the actual schedule with its evidence. Replay the exported schedule through adapters and the executor; reject invalid prerequisites, arbitrary remote URLs and credential references. Run one changed-identity/timing holdout.
 
-Proposed exploration caps: 200 schedules, eight abstract transitions within the selected failure window and 60 seconds of model exploration. Fixed setup is outside that window and must be declared separately. This is a bounded model search; only replay against the actual application establishes implementation behavior. Replay promising counterexamples against the stateful fixture first; use Arga or real resources only when the endpoint capabilities and explicit run permissions permit it. Do not launch 200 real SaaS writes or 200 costly LLM runs to simulate exploration.
-
-The reducer removes events only when dependencies and actors remain valid and the same failure still reproduces after reset. Export the reduced result and the unreduced parent schedule, the predicate ID, seed, contract version, implementation digest and provider modes. Replaying a fixed tool trace is deterministic trace replay; rerunning the model is a separate stochastic evaluation and must not be labeled deterministic.
+Automatic schedule search and dependency-preserving reduction are deferred. Do not call the authored trace discovered, minimized, shortest or exhaustive. Retain the safe replay schema and distinguish recorded synthetic planner replay from fresh model execution.
 
 **A14. Fault injection and evidence provenance**
 
 The primary fault is drop_response_after_apply on one identified GitHub publish attempt. The transport forwards one real request, consumes the successful remote response, withholds it from the worker and emits a timeout. It does not fabricate the release. A private observer may record what happened but cannot feed the hidden response into the worker's recovery logic.
 
-Fixture processes maintain actual mutable provider state independently of the agent; they must reject malformed requests and implement relevant errors. Importing the agent's own predicate into the fake provider to determine its response would invalidate independence. A twin is useful additional evidence, not a prerequisite for the first complete product. Arga support must be checked for release/tag, approval transport and Linear operations; unsupported methods stay explicit. [Arga setup](https://docs.argalabs.com/quickstart).
+Fixture processes maintain actual mutable provider state independently of the agent; they must reject malformed requests and implement relevant errors. Importing the agent's own predicate into the fake provider to determine its response would invalidate independence. ADR-09 defers twin and Arga integration; no unsupported method may fall back to a real service.
 
 Every claim has a provenance level: model candidate, fixture reproduced, twin reproduced or real-test reproduced. Every export lists per-provider modes, unsupported capabilities, expected vs actual results, actual attempt counts and observation times. Pass/fail animation must read persisted results. No synthetic result may appear as a real API observation.
 
@@ -365,7 +365,7 @@ UI performance targets are design goals: local command acceptance within 500 ms 
 
 **A16. Delivery boundary and later production work**
 
-Ship two processes on one persistent host, a restart procedure, environment template, sample fixture data, migrations, evaluation commands, redacted evidence and a two-minute demo. Basic authenticated hosting is an optional delivery mode; a reproducible local project is the default. Do not place SQLite on an ephemeral serverless filesystem.
+Ship two processes on one persistent host, a restart procedure, environment template, sample fixture data, migrations, evaluation commands, redacted evidence and a two-minute demo. ADR-09 makes authenticated hosted deployment a P6 deliverable. Use one persistent host with HTTPS and runtime secrets; verify actual hosting access and native SQLite support. Preserve a reproducible local delivery if access blocks deployment and mark hosting incomplete. Do not place SQLite on an ephemeral serverless filesystem.
 
 After evidence of customer use, consider Postgres, a durable queue, authenticated multi-workspace tenancy, OAuth installation, encrypted credential management, provider-native concurrency controls and operational monitoring. Multi-worker scaling requires a new side-effect concurrency design; adding a lease does not automatically fence an already-issued external API request. These are future changes with migration plans, not unfinished prerequisites hidden inside the hackathon scope.
 

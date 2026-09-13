@@ -1,5 +1,7 @@
 **ReleaseProof evaluation contract**
 
+ADR-09 (2026-09-14): [combined P3](06-COMBINED-PHASE-3.md) replaces standalone P3/P4/P5. Scenario IDs and INV-01–05 retain their meanings. Phase references below are historical ownership hints; the combined plan defines active gates. No safety assertion is relaxed.
+
 This document defines the evidence required to claim the application works. All results are initially NOT_RUN. Expected outcomes are specifications, not achieved measurements. Keep scenario IDs stable across code changes and reference them from phase evidence.
 
 **E1. Five independently checked rules**
@@ -56,11 +58,11 @@ FaultController supports named hooks rather than sleeps chosen to happen near a 
 
 The ordinary worker cannot read the private fault observer. Hidden successful responses must not supply their remote IDs to reconciliation. The worker must discover the existing object through its normal read adapter.
 
-**E5. Search and minimization scope**
+**E5. Authored regression replay scope (ADR-09)**
 
-The small model explorer enumerates valid actor/event orders under the stated caps. A model-state failure is only a candidate until reproduced against the application. Report candidate counts, executed replays, failures, unsupported paths, timeouts and pruned paths separately.
+Automatic event-order exploration and trace minimization are deferred. Execute a fixed authored schedule for the baseline/corrected comparison and export the schedule actually exercised. Label its origin `authored`; do not report discovery, reduction, minimality or exploration coverage.
 
-Reduce a failing schedule by removing an event or contiguous segment, checking dependency/actor validity, resetting the environment and replaying the same rule. Retain a removal only when the same failure reproduces. Stop at a local reduced result within budget. Do not call it the globally shortest sequence without exhaustive proof in the declared model.
+Replay must validate actor prerequisites and re-execute the adapter/executor behavior in reset isolated fixtures. Preserve separate expected business outcome and test status. A baseline violation is an expected checker result, not a successful release.
 
 Regression JSON must contain schemaVersion, scenarioId, seed, fixedSetup, eventSchedule, actors, environment capabilities, provider modes, policyVersion, manifest fields with synthetic identities, implementationDigest, predicate ID and expected outcome. Exports remove credentials, cookies, private message contents and unnecessary personal data. A replay must not read credentials or arbitrary base URLs out of its file.
 
@@ -105,8 +107,8 @@ Report exact numerators and denominators for legitimate completions, unsafe publ
 
 **E8. Acceptance and evidence publication**
 
-P2 needs an actual three-app happy path with a real model and Slack approval. P3 needs SC-05/08/09 to pass through adapters in fixtures and SC-05 to be demonstrated on dedicated real-test resources. P4 needs SC-02's paired comparison, a reduced replayable counterexample and the held-out seed. P5 needs browser behavior to agree with evidence. P6 needs the complete applicable fixture corpus and a current real three-app demonstration, with missing cases explicit.
+P2 needs an actual three-app happy path with a real model and Slack approval. Combined P3 needs SC-05/08/09 recovery, the retained boundary cases SC-10–16, INV-01–05, SC-02's fixture-only paired comparison, an authored replayable counterexample, one held-out variant and browser behavior that agrees with evidence. Standalone P4/P5 gates are superseded. P6 needs current applicable fixture results, real SC-01 and SC-05 evidence, reproducible setup and actual hosted deployment verification; missing cases or hosting access remain explicit. Live SC-02 drift and extra fresh model repetitions are optional, separately reported.
 
-CLI exit behavior is strict: a verification command exits nonzero when a required assertion fails, no required tests are discovered, or a required real check was skipped. Evaluation exploration can successfully find a failing baseline, but its machine-readable result must distinguish testStatus=PASS from actualBusinessOutcome=unsafe. Unimplemented future checks fail clearly when invoked; no placeholder script may return success.
+CLI exit behavior is strict: a verification command exits nonzero when a required assertion fails, no required tests are discovered, or a required real check was skipped. Evaluation can successfully reproduce a failing baseline, but its machine-readable result must distinguish testStatus=PASS from actualBusinessOutcome=unsafe. Unimplemented future checks fail clearly when invoked; no placeholder script may return success.
 
 Commit compact redacted results, phase evidence and replay fixtures. Keep raw traces, credentials, SQLite files, private account data and unreviewed screenshots out of Git. A human-readable reliability brief must use the exact same result records as the dashboard and machine-readable export.
