@@ -2,16 +2,23 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "composite": true,
+    "paths": {
+      "@releaseproof/contracts": ["../../packages/contracts/src/index.ts"],
+      "@releaseproof/core": ["../../packages/core/src/index.ts"]
+    },
     "lib": ["ES2024", "DOM"],
     "jsx": "preserve",
     "plugins": [{ "name": "next" }],
     "incremental": true,
     "noEmit": true
   },
-  "references": [
-    { "path": "../../packages/contracts" },
-    { "path": "../../packages/core" }
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "../../packages/contracts/src/**/*.ts",
+    "../../packages/core/src/**/*.ts"
   ],
-  "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
 }

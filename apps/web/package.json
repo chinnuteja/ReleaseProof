@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1 --port 3000",
-    "build": "npm run build --workspace @releaseproof/contracts && npm run build --workspace @releaseproof/core && next build"
+    "build": "next build"
   },
   "dependencies": {
     "@releaseproof/contracts": "0.1.0",
