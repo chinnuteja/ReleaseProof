@@ -11,6 +11,7 @@
     "packages/*"
   ],
   "scripts": {
+    "postinstall": "npm run build --workspace @releaseproof/contracts && npm run build --workspace @releaseproof/core",
     "build": "npm run build --workspaces --if-present",
     "typecheck": "tsc --build tsconfig.build.json --pretty false",
     "lint": "eslint .",
