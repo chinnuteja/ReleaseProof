@@ -17,7 +17,7 @@ Update this record at every phase checkpoint and session handoff. Record evidenc
 | Git repository at planning time | Initialized locally during P1; remote verified empty before setup |
 | GitHub owner/repository/visibility | chinnuteja/ReleaseProof; visibility not independently inspected |
 | Remote/upstream | origin configured to supplied repository; main not pushed yet |
-| Remote synchronization | NOT_SYNCED; attempted to push f2c8ed1 to origin/main, but GitHub returned HTTP 403 because authenticated account `chanukya13` lacks write access to `chinnuteja/ReleaseProof` |
+| Remote synchronization | SYNCED; verify the live `origin/main` SHA after each subsequent push rather than storing a self-referential final SHA here |
 | CI | NOT_CONFIGURED |
 | Current runtime observed | Host Node 22.14.0 is EOL; project-local Node 24.21.0 LTS selected and used for P1 |
 | Application model | Not selected or authenticated; P1 capability smoke test required |
@@ -97,7 +97,7 @@ Tested implementation digest: 12ef243b84769c38364aa1a8f30eb32f31bd5e6d6bb6ef4d81
 Commands / actual exits / actual scenario outcomes: typecheck 0; lint 0; db:migrate 0; fixture doctor 0; P1 fixture verify 0 with 5 tests passed; check 0; real-test doctor 1 due to missing credentials; npm ci NOT_COMPLETED after Windows file-lock/hang investigation.
 Evidence paths: evidence/P1.md
 Git commit before this state update, if any: f2c8ed1
-Remote verification observed in this session: origin/main push rejected with HTTP 403; authenticated account chanukya13 lacks write permission for chinnuteja/ReleaseProof
+Remote verification observed in this session: after GitHub device authentication as chinnuteja, origin/main matched local 05be064d427edb6d9519f817228cd6fc07a4348b
 CI commit and status: NOT_CONFIGURED
 Failed or unrun checks: P1-G1 clean npm ci; P1-G5 real provider probes; P1-G6 real model structured-output smoke test
 Missing dependencies: dedicated GitHub demo repository/access, Slack app/channel/reviewer, Linear test team/state, application API key/model
