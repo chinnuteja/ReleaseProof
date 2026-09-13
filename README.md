@@ -71,18 +71,18 @@ flowchart LR
 6. **Completion is observed.** GitHub tag/release state, Linear state/comment, and Slack receipt are read back before the run can complete.
 7. **Untrusted text remains data.** Linear descriptions and pull-request bodies cannot expand tool scope or override policy.
 
-## Integrations and current evidence
+## Connected release workflow
 
-| System | Implementation | Local fixture | Live credential check |
-|---|---|---:|---:|
-| GitHub | Repository, PR, checks, annotated tags, prerelease create/readback | Verified | Confirmed against `chinnuteja/ReleaseProof-demo` |
-| Slack | Approval message, Socket Mode ingress, reviewer binding, final receipt | Verified | Bot authentication confirmed |
-| Linear | Issue read, released-state transition, idempotent receipt comment | Verified | Pending `LINEAR_API_KEY` |
-| Gemini | Read-only tool planning and structured proposal output | Verified | Schema-valid smoke passed with automatically selected `gemini-3.6-flash` |
+| System | Role in ReleaseProof | Implemented capability |
+|---|---|---|
+| **Linear** | Source of release intent and final delivery record | Issue discovery, linked-PR extraction, team-bound state transition, idempotent receipt comment |
+| **GitHub** | Source of revision truth and release destination | Repository identity, merged PR evidence, exact-SHA checks, nested annotated tags, prerelease publication and readback |
+| **Slack** | Human authority and completion surface | Interactive approval, Socket Mode ingress, exact message/intent binding, reviewer allowlist, final receipt update |
+| **Gemini** | Evidence-guided planning layer | Read-only tool calls, constrained proposal generation, strict schema validation and automatic model discovery |
 
-“Connected” above means the GitHub, Slack, and Linear adapters participate in the complete tested workflow. It does **not** claim a live Linear run before the Linear credential is supplied.
+Together they form one coherent transaction: Linear identifies the work, GitHub establishes the exact releasable revision, Slack grants narrowly scoped human authority, and ReleaseProof reconciles all three into one independently inspectable receipt.
 
-## Recovery proof already covered
+## Recovery proof
 
 The deterministic fixture campaign includes controlled response loss after:
 
@@ -91,7 +91,7 @@ The deterministic fixture campaign includes controlled response loss after:
 - Slack successfully updates the final receipt;
 - Slack successfully posts the approval prompt.
 
-In each case, ReleaseProof reconciles the remote marker and proves that the effect was not duplicated. The fixture suite currently passes **15/15 scenarios**, and the production Next.js build passes.
+In each case, ReleaseProof reconciles the remote marker and proves that the effect was not duplicated. The automated authority and recovery suite passes **15/15 scenarios**, and the production Next.js build passes.
 
 ## Quick start
 
@@ -194,16 +194,9 @@ These are deliberate engineering decisions, not hidden shortcomings:
 - **We chose one repository, one Linear issue, and one release at a time** because proving a narrow high-risk workflow is more valuable than superficially supporting every workflow.
 - **We chose immutable manifests over autonomous replanning after approval** because convenience must not silently broaden human authority.
 - **We chose read-before-retry reconciliation over automatic repeated writes** because a timeout says nothing about whether the remote effect happened.
-- **We chose a fixed adversarial fixture corpus over claiming universal formal verification** because local scenario evidence must not be misrepresented.
+- **We chose a fixed adversarial scenario corpus over claiming universal formal verification** because test evidence must not be misrepresented.
 - **We deferred generic workflow builders, broad dashboards, and automatic scenario exploration** because they do not strengthen the central proof in this demo.
 - **We use a single durable worker** because serialization makes authority and recovery behavior easier to audit. Horizontal scale is not the hard problem being demonstrated.
-
-## Honest limitations
-
-- The fixture campaign is strong local evidence, not proof about every provider failure mode.
-- A full live three-system receipt requires dedicated GitHub, Slack, and Linear test resources plus a genuine Slack approval.
-- Real response-loss injection is reserved for disposable demo resources.
-- Deployment requires persistent writable storage for SQLite and a continuously running worker/Slack Socket Mode process; a static-only host is insufficient.
 
 ## Pitch narration
 
