@@ -1,0 +1,22 @@
+{
+  "environmentId": "demo",
+  "repositoryId": "replace-with-dedicated-test-repository-id",
+  "repositoryFullName": "owner/releaseproof-demo",
+  "github": { "mode": "real_test", "baseUrl": "https://api.github.com" },
+  "slack": {
+    "mode": "real_test",
+    "baseUrl": "https://slack.com/api",
+    "teamId": "replace-with-test-team-id",
+    "channelId": "replace-with-test-channel-id",
+    "reviewerUserIds": ["replace-with-allowlisted-reviewer-id"]
+  },
+  "linear": {
+    "mode": "real_test",
+    "baseUrl": "https://api.linear.app/graphql",
+    "teamId": "replace-with-test-team-id",
+    "releasedStateId": "replace-with-released-state-id"
+  },
+  "requiredChecks": [{ "name": "ci", "appId": "replace-with-github-app-id" }],
+  "releaseTagPrefix": "rp-demo-",
+  "policyVersion": "2026-09-p1"
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@releaseproof/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --build"
+  },
+  "dependencies": {
+    "@releaseproof/contracts": "0.1.0",
+    "better-sqlite3": "13.0.3",
+    "openai": "7.15.0"
+  }
+}

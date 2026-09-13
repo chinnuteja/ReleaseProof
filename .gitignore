@@ -1,0 +1,35 @@
+# Dependencies and build outputs
+node_modules/
+.tools/
+.next/
+dist/
+coverage/
+*.tsbuildinfo
+playwright-report/
+test-results/
+
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Runtime state and private evidence
+var/**
+!var/.gitkeep
+artifacts/private/**
+!artifacts/private/.gitkeep
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+*.db-shm
+*.db-wal
+
+# Logs and editor/OS files
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

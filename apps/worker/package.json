@@ -1,0 +1,15 @@
+{
+  "name": "@releaseproof/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --build"
+  },
+  "dependencies": {
+    "@releaseproof/contracts": "0.1.0",
+    "@releaseproof/core": "0.1.0",
+    "@slack/socket-mode": "3.0.1",
+    "@slack/web-api": "8.1.1"
+  }
+}

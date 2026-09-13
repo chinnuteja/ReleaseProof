@@ -1,0 +1,15 @@
+{
+  "name": "@releaseproof/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "next build"
+  },
+  "dependencies": {
+    "@releaseproof/contracts": "0.1.0",
+    "@releaseproof/core": "0.1.0",
+    "next": "16.3.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  }
+}
