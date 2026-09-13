@@ -7,12 +7,12 @@ Update this record at every phase checkpoint and session handoff. Record evidenc
 | Field | Value |
 | --- | --- |
 | Deliverable prepared | Revised delivery plan: P1 → P2 → combined P3 → P6; ADR-09 and 06-COMBINED-PHASE-3.md |
-| Application implementation | P1 local foundation and P2 fixture vertical slice implemented; real provider/model gates remain blocked |
+| Application implementation | P1/P2 local foundation and fixture vertical slice implemented; combined P3 recovery, proof tools, and workspace are implemented locally; real provider/model gates remain blocked |
 | Next phase | Combined P3 — recovery, proof, and product (absorbs P4/P5) |
 | Next exact action | Read 06-COMBINED-PHASE-3.md; start at P3.0 to close/re-verify P2 gaps. This handoff edits the plan only. Preserve uncommitted application work. Proceed directly to P6 after combined P3. |
-| Last locally verified implementation phase | P2 fixture at earlier checkpoint; later hardening is not fully certified by that digest |
+| Last locally verified implementation phase | P3 combined local checkpoint: 15 fixture scenarios and production web build passed |
 | Last tested implementation digest | `94126386251a1ae3d9cf1518b003bd94b088fc46128d85581652cfaa5dd8db92` |
-| Application tests run | P1 fixture 5/5; P2 fixture 11/11 |
+| Application tests run | P1 fixture 5/5; P3 fixture 15/15 (includes P2 authority coverage and P3 recovery scenarios) |
 | Last application commit | Verify after the pending P2 checkpoint push; previous remote HEAD was `6f04453202685203d9a1a0d4c9a2e14db3458fec` |
 | Git repository at planning time | Initialized locally during P1; remote verified empty before setup |
 | GitHub owner/repository/visibility | chinnuteja/ReleaseProof; visibility not independently inspected |
@@ -29,8 +29,8 @@ Update this record at every phase checkpoint and session handoff. Record evidenc
 | Phase | Local status | Real/external gate | Evidence | Next incomplete checkpoint |
 | --- | --- | --- | --- | --- |
 | P1 | LOCAL_VERIFIED | BLOCKED | evidence/P1.md | P1-G5/G6 real provider and model probes once credentials exist |
-| P2 | IN_PROGRESS | BLOCKED | evidence/P2.md (earlier fixture checkpoint) | Close P3.0 gaps and re-verify; P2-G1 real three-app run still required |
-| P3 combined | NOT_STARTED | NOT_CHECKED | Plan: 06-COMBINED-PHASE-3.md | P3.0; real SC-05 consolidated into P6 |
+| P2 | LOCAL_VERIFIED | BLOCKED | evidence/P2.md | Fixture authority flow is current; P2-G1 real three-app run still required |
+| P3 combined | LOCAL_VERIFIED | BLOCKED | evidence/P3.md | Local recovery/proof/workspace checkpoint is complete; run real verification and P6 handoff when credentials arrive |
 | P4 | SUPERSEDED | NOT_APPLICABLE | ADR-09 | Proof work retained in combined P3; explorer/reducer deferred |
 | P5 | SUPERSEDED | NOT_APPLICABLE | ADR-09 | Workspace/browser work retained in combined P3 |
 | P6 | NOT_STARTED | NOT_CHECKED | None | P6.1 |

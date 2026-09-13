@@ -2,7 +2,14 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
 export default [
-  { ignores: ['**/dist/**', '**/.next/**', '**/node_modules/**', '**/coverage/**', '.tools/**'] },
+  { ignores: ['**/dist/**', '**/.next/**', '**/node_modules/**', '**/coverage/**', '.tools/**', 'artifacts/**'] },
+  {
+    languageOptions: {
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname
+      }
+    }
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSession, sessionCookieName } from '../../../lib/server/session.js';
+import { sameOrigin } from '../../../lib/server/operator.js';
 
 export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   const configuredPassword = process.env.OPERATOR_PASSWORD;
   const sessionSecret = process.env.SESSION_SECRET;
-  if (!configuredPassword || !sessionSecret) return NextResponse.json({ code: 'CONFIGURATION_INVALID', message: 'Operator session is not configured.' }, { status: 503 });
+  const configuredOrigin = process.env.APP_ORIGIN;
+  if (!configuredPassword || !sessionSecret || !configuredOrigin) return NextResponse.json({ code: 'CONFIGURATION_INVALID', message: 'Operator session is not configured.' }, { status: 503 });
+  if (!sameOrigin(request.headers.get('origin'), request.headers.get('host'), configuredOrigin)) {
+    return NextResponse.json({ code: 'CSRF_INVALID', message: 'Origin or Host is invalid.' }, { status: 403 });
+  }
   const body: unknown = await request.json().catch(() => null);
   if (!body || typeof body !== 'object' || !('password' in body) || typeof body.password !== 'string' || body.password !== configuredPassword) {
     return NextResponse.json({ code: 'UNAUTHORIZED', message: 'Invalid operator credentials.' }, { status: 401 });

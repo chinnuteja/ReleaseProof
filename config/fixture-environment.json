@@ -1,0 +1,23 @@
+{
+  "environmentId": "fixture",
+  "repositoryId": "42",
+  "repositoryFullName": "acme/releaseproof-demo",
+  "github": { "mode": "fixture", "baseUrl": "http://127.0.0.1:0" },
+  "slack": {
+    "mode": "fixture",
+    "baseUrl": "http://127.0.0.1:0",
+    "appId": "A-FIXTURE",
+    "teamId": "T-FIXTURE",
+    "channelId": "C-FIXTURE",
+    "reviewerUserIds": ["U-REVIEWER"]
+  },
+  "linear": {
+    "mode": "fixture",
+    "baseUrl": "http://127.0.0.1:0",
+    "teamId": "TEAM-FIXTURE",
+    "releasedStateId": "STATE-RELEASED"
+  },
+  "requiredChecks": [{ "name": "ci", "appId": "github-actions" }],
+  "releaseTagPrefix": "rp-demo-",
+  "policyVersion": "2026-09-p2"
+}

@@ -14,6 +14,12 @@ export type RunRow = {
   phase: RunPhase;
   status: RunStatus;
   version: number;
+  manifest_id: string | null;
+  environment_fingerprint: string | null;
+  environment_json: string | null;
+  issue_identifier: string | null;
+  release_intent: string | null;
+  planner_error: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -26,6 +32,8 @@ export type CommandRow = {
   payload_json: string;
   created_at: string;
   applied_at: string | null;
+  expected_version?: number | null;
+  error_code?: string | null;
 };
 
 const now = () => new Date().toISOString();
@@ -67,7 +75,12 @@ export function canonicalRequestHash(request: RunRequest): string {
   return createHash('sha256').update(JSON.stringify({ issueIdentifier: request.issueIdentifier, releaseIntent: request.releaseIntent }), 'utf8').digest('hex');
 }
 
-export function acceptRunRequest(database: ReleaseProofDatabase, environmentId: string, request: RunRequest): { run: RunRow; created: boolean } {
+export function acceptRunRequest(
+  database: ReleaseProofDatabase,
+  environmentId: string,
+  request: RunRequest,
+  options: { fingerprint?: string; environmentJson?: string } = {}
+): { run: RunRow; created: boolean } {
   const requestHash = canonicalRequestHash(request);
   const existing = database.prepare('SELECT * FROM runs WHERE environment_id = ? AND request_key = ?').get(environmentId, request.requestKey) as RunRow | undefined;
   if (existing) {
@@ -76,10 +89,28 @@ export function acceptRunRequest(database: ReleaseProofDatabase, environmentId: 
   }
 
   const timestamp = now();
-  const run: RunRow = { id: randomUUID(), environment_id: environmentId, request_key: request.requestKey, request_hash: requestHash, phase: 'requested', status: 'active', version: 1, created_at: timestamp, updated_at: timestamp };
+  const extras = { fingerprint: options.fingerprint ?? null, environmentJson: options.environmentJson ?? null };
+  const run: RunRow = {
+    id: randomUUID(),
+    environment_id: environmentId,
+    request_key: request.requestKey,
+    request_hash: requestHash,
+    phase: 'requested',
+    status: 'active',
+    version: 1,
+    manifest_id: null,
+    environment_fingerprint: extras.fingerprint,
+    environment_json: extras.environmentJson,
+    issue_identifier: request.issueIdentifier,
+    release_intent: request.releaseIntent,
+    planner_error: null,
+    created_at: timestamp,
+    updated_at: timestamp
+  };
   const command: CommandRow = { id: randomUUID(), run_id: run.id, kind: 'prepare_run', status: 'queued', payload_json: JSON.stringify(request), created_at: timestamp, applied_at: null };
   database.transaction(() => {
-    database.prepare('INSERT INTO runs(id, environment_id, request_key, request_hash, phase, status, version, created_at, updated_at) VALUES (@id, @environment_id, @request_key, @request_hash, @phase, @status, @version, @created_at, @updated_at)').run(run);
+    database.prepare(`INSERT INTO runs(id, environment_id, request_key, request_hash, phase, status, version, created_at, updated_at, environment_fingerprint, environment_json, issue_identifier, release_intent)
+      VALUES (@id, @environment_id, @request_key, @request_hash, @phase, @status, @version, @created_at, @updated_at, @environment_fingerprint, @environment_json, @issue_identifier, @release_intent)`).run(run);
     database.prepare('INSERT INTO commands(id, run_id, kind, dedupe_key, payload_json, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)').run(command.id, command.run_id, command.kind, `run:${run.id}:prepare`, command.payload_json, command.status, command.created_at);
     database.prepare('INSERT INTO events(id, run_id, sequence, kind, actor, correlation_id, payload_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)').run(randomUUID(), run.id, 1, 'RunRequested', 'operator', command.id, command.payload_json, timestamp);
   })();
@@ -88,10 +119,11 @@ export function acceptRunRequest(database: ReleaseProofDatabase, environmentId: 
 
 export function claimNextCommand(database: ReleaseProofDatabase): CommandRow | null {
   return database.transaction(() => {
-    const command = database.prepare("SELECT id, run_id, kind, status, payload_json, created_at, applied_at FROM commands WHERE status = 'queued' ORDER BY created_at LIMIT 1").get() as CommandRow | undefined;
+    const command = database.prepare("SELECT id, run_id, kind, status, payload_json, created_at, applied_at, expected_version, error_code FROM commands WHERE status = 'queued' ORDER BY created_at, id LIMIT 1").get() as CommandRow | undefined;
     if (!command) return null;
-    const updated = database.prepare("UPDATE commands SET status = 'applied', applied_at = ? WHERE id = ? AND status = 'queued'").run(now(), command.id);
-    return updated.changes === 1 ? { ...command, status: 'applied' as const, applied_at: now() } : null;
+    const appliedAt = now();
+    const updated = database.prepare("UPDATE commands SET status = 'applied', applied_at = ? WHERE id = ? AND status = 'queued'").run(appliedAt, command.id);
+    return updated.changes === 1 ? { ...command, status: 'applied' as const, applied_at: appliedAt } : null;
   })();
 }
 

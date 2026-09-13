@@ -1,11 +1,12 @@
 {
   "environmentId": "demo",
   "repositoryId": "replace-with-dedicated-test-repository-id",
-  "repositoryFullName": "owner/releaseproof-demo",
+  "repositoryFullName": "chinnuteja/ReleaseProof-demo",
   "github": { "mode": "real_test", "baseUrl": "https://api.github.com" },
   "slack": {
     "mode": "real_test",
     "baseUrl": "https://slack.com/api",
+    "appId": "replace-with-slack-app-id",
     "teamId": "replace-with-test-team-id",
     "channelId": "replace-with-test-channel-id",
     "reviewerUserIds": ["replace-with-allowlisted-reviewer-id"]
@@ -18,5 +19,5 @@
   },
   "requiredChecks": [{ "name": "ci", "appId": "replace-with-github-app-id" }],
   "releaseTagPrefix": "rp-demo-",
-  "policyVersion": "2026-09-p1"
+  "policyVersion": "2026-09-p2"
 }

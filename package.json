@@ -17,13 +17,14 @@
     "check": "npm run typecheck && npm run lint && npm run build",
     "db:migrate": "tsx scripts/db-migrate.ts",
     "doctor": "tsx scripts/doctor.ts",
+    "model:smoke": "tsx scripts/model-smoke.ts",
     "verify": "tsx scripts/verify.ts",
     "dev": "tsx scripts/dev.ts",
     "test:foundation": "vitest run --config vitest.config.mts",
-    "test:browser": "tsx scripts/not-implemented.ts test:browser",
-    "eval": "tsx scripts/not-implemented.ts eval",
-    "replay": "tsx scripts/not-implemented.ts replay",
-    "export:evidence": "tsx scripts/not-implemented.ts export:evidence"
+    "test:browser": "tsx scripts/browser-check.ts",
+    "eval": "tsx scripts/eval.ts",
+    "replay": "tsx scripts/replay.ts",
+    "export:evidence": "tsx scripts/export-evidence.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

@@ -1,0 +1,30 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  fixture:
+    name: lockfile install and fixture gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.21.0
+          cache: npm
+      - name: Clean lockfile install
+        run: npm ci
+      - name: Apply migrations
+        run: npm run db:migrate
+      - name: Typecheck, lint, and production build
+        run: npm run check
+      - name: Fixture doctor
+        run: npm run doctor -- --mode fixture
+      - name: Phase 1 fixture verification
+        run: npm run verify -- --phase P1 --mode fixture
+      - name: Phase 2 fixture verification
+        run: npm run verify -- --phase P2 --mode fixture
